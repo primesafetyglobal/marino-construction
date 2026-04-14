@@ -6,7 +6,7 @@ export const PUBLIC_NAV_ITEMS: INavItem[] = [
 //   { label: "Features", href: "/features" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "Benefits", href: "/benefits" },
-  { label: "Services", href: "/services" },
+  // { label: "Services", href: "/services" },
 //   { label: "Security", href: "/security" },
 //   { label: "FAQs", href: "/faqs" },
 //   { label: "About", href: "/about" },

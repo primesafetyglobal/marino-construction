@@ -5,7 +5,7 @@ import { Shield, Mail, MapPin } from "lucide-react";
 const footerLinks = {
   product: [
     { label: "Features", href: "/features" },
-    { label: "Pricing", href: "/pricing" },
+    { label: "Services", href: "/services" },
     { label: "Security", href: "/security" },
     { label: "How It Works", href: "/how-it-works" },
   ],
