@@ -1,0 +1,14 @@
+{
+     "File": "Bimenyimana_J_Damascene_CV.pdf (3990.4 KB)",
+     "Signature Position (bottom-left PDF coords)": "Object",
+     "Certificate": "Dushime_Brother.pfx",
+     "Certificate CN": "Dushime Brother",
+     "Password": "••••••••",
+     "FormData entries": "Object",
+     "forward-logs-shared.ts:95": {
+          "file": "File(Bimenyimana_J_Damascene_CV.pdf)",
+          "signaturePosition": {"pageIndex":1,"x":19,"y":550,"width":180,"height":60},
+          "certificate": "File(Dushime_Brother.pfx)",
+          "certificatePassword": "Dushime@2025"
+     }
+}
