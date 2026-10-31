@@ -1,0 +1,204 @@
+// MODULE 2: OPERATIONS
+// Requests and their history
+// Source: docs/spec/02-data-model.md
+
+// ── Enums ──
+
+enum EquipmentRequestType {
+  RENT
+  BUY
+}
+
+enum EquipmentRequestStatus {
+  NEW
+  QUOTED
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SupplyOrderStatus {
+  NEW
+  QUOTED
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+enum ServiceRequestStatus {
+  NEW
+  QUOTED
+  SCHEDULED
+  IN_PROGRESS
+  DELIVERED
+  CANCELLED
+}
+
+enum WorkforceRequestStatus {
+  NEW
+  RECRUITING
+  FILLED
+  CLOSED
+}
+
+enum ApplicationStatus {
+  NEW
+  SHORTLISTED
+  PLACED
+  REJECTED
+}
+
+enum RequestSource {
+  WEBSITE
+  PHONE
+  WHATSAPP
+  WALK_IN
+}
+
+enum PaymentPlan {
+  FULL
+  INSTALLMENT
+}
+
+// ── Models ──
+
+model EquipmentRequest {
+  id           String                 @id @default(uuid())
+  number       Int                    @unique @default(autoincrement()) // EQ-0001
+  type         EquipmentRequestType
+  clientId     String
+  equipmentId  String?
+  details      String
+  siteLocation String
+  startDate    DateTime?
+  endDate      DateTime?
+  quotedAmount Int?
+  status       EquipmentRequestStatus @default(NEW)
+  source       RequestSource          @default(WEBSITE)
+  handledById  String?
+  notes        String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  client    Client     @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  equipment Equipment? @relation(fields: [equipmentId], references: [id], onDelete: SetNull)
+  handledBy User?      @relation(fields: [handledById], references: [id], onDelete: SetNull)
+  payments  Payment[]
+
+  @@index([clientId])
+  @@index([equipmentId])
+  @@index([status])
+  @@index([handledById])
+}
+
+model SupplyOrder {
+  id               String            @id @default(uuid())
+  number           Int               @unique @default(autoincrement()) // SO-0001
+  clientId         String
+  productId        String?
+  vendorId         String?
+  items            String
+  deliveryLocation String
+  deliveryDate     DateTime?
+  quotedAmount     Int?
+  status           SupplyOrderStatus @default(NEW)
+  source           RequestSource     @default(WEBSITE)
+  handledById      String?
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  product   Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  vendor    Vendor?   @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  handledBy User?     @relation(fields: [handledById], references: [id], onDelete: SetNull)
+  payments  Payment[]
+
+  @@index([clientId])
+  @@index([productId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([handledById])
+}
+
+model ServiceRequest {
+  id             String               @id @default(uuid())
+  number         Int                  @unique @default(autoincrement()) // SR-0001
+  clientId       String
+  serviceId      String
+  vendorId       String?
+  details        String
+  siteLocation   String
+  preferredDate  DateTime?
+  quotedAmount   Int?
+  paymentPlan    PaymentPlan          @default(FULL)
+  status         ServiceRequestStatus @default(NEW)
+  deliveredAt    DateTime?
+  deliveryReport String?
+  source         RequestSource        @default(WEBSITE)
+  handledById    String?
+  notes          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  service   Service   @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  vendor    Vendor?   @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  handledBy User?     @relation(fields: [handledById], references: [id], onDelete: SetNull)
+  payments  Payment[]
+
+  @@index([clientId])
+  @@index([serviceId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([handledById])
+}
+
+model WorkforceRequest {
+  id             String                 @id @default(uuid())
+  number         Int                    @unique @default(autoincrement()) // WR-0001
+  clientId       String
+  role           String
+  quantity       Int
+  duration       String
+  siteLocation   String
+  startDate      DateTime?
+  details        String?
+  isPublished    Boolean                @default(false)
+  jobDescription String?
+  deadline       DateTime?
+  status         WorkforceRequestStatus @default(NEW)
+  source         RequestSource          @default(WEBSITE)
+  handledById    String?
+  notes          String?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  client       Client           @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  handledBy    User?            @relation(fields: [handledById], references: [id], onDelete: SetNull)
+  applications JobApplication[]
+
+  @@index([clientId])
+  @@index([isPublished])
+  @@index([status])
+  @@index([handledById])
+}
+
+model JobApplication {
+  id                 String            @id @default(uuid())
+  workforceRequestId String
+  applicantId        String
+  message            String?
+  status             ApplicationStatus @default(NEW)
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  workforceRequest WorkforceRequest @relation(fields: [workforceRequestId], references: [id], onDelete: Cascade)
+  applicant        Applicant        @relation(fields: [applicantId], references: [id], onDelete: Restrict)
+
+  @@unique([workforceRequestId, applicantId])
+  @@index([applicantId])
+  @@index([status])
+}
