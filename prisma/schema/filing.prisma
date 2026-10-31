@@ -1,0 +1,80 @@
+enum FileStatus {
+  ACTIVE
+  DELETED
+}
+
+enum StorageAccess {
+  PUBLIC    // objects readable by URL
+  PRIVATE   // served through presigned URLs only
+}
+
+model FileStorage {
+  id              String        @id @default(cuid())
+  name            String                  // "AWS S3 – eu-west-1", "Cloudflare R2"
+  endpoint        String?                 // null = AWS default; R2/MinIO/B2 need it
+  region          String                  // "auto" for R2
+  bucket          String
+  prefix          String                  // app folder in the bucket, e.g. "elite-jobs"
+  forcePathStyle  Boolean       @default(false) // true for MinIO and some others
+  accessKeyId     String
+  secretAccessKey String                  // encrypted at rest
+  publicBaseUrl   String?                 // CDN/custom domain; null = built from endpoint
+  access          StorageAccess @default(PUBLIC)
+  isActive        Boolean       @default(false) // exactly one active: receives new uploads
+  isReadOnly      Boolean       @default(false) // old storage during migration
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  files           File[]
+}
+
+model FileSettings {
+  id               String   @id @default("default") // single row
+  maxUploadMb      Int      @default(20)
+  allowedMimeTypes String[]
+  folderRules      Json?    // { "users-icons": { "mimeTypes": [...], "maxMb": 2 } }
+  presignExpirySec Int      @default(300)
+  updatedAt        DateTime @updatedAt
+}
+
+model File {
+  id         String      @id @default(uuid())
+  key        String      @unique   // the reference other modules store
+  storageId  String
+  storage    FileStorage @relation(fields: [storageId], references: [id])
+  name       String
+  mimeType   String
+  size       Int
+  folder     String?
+  status     FileStatus  @default(ACTIVE)
+  legacyUrl  String?     @unique   // retro-fit only: the URL the app used before
+  uploadedAt DateTime    @default(now())
+  deletedAt  DateTime?
+
+  @@index([status, uploadedAt])
+  @@index([folder])
+  @@index([storageId])
+}
+
+enum BackupStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model FileBackup {
+  id          String       @id @default(cuid())
+  type        String       // "FULL" | "INCREMENTAL"
+  fromDate    DateTime?    // incremental: files uploaded after this
+  toDate      DateTime
+  fileCount   Int          @default(0)
+  totalSize   BigInt       @default(0)
+  status      BackupStatus @default(PENDING)
+  archiveKey  String?      // where the zip was stored
+  error       String?
+  createdBy   String?
+  createdAt   DateTime     @default(now())
+  completedAt DateTime?
+  storageId  String?   // which storage holds the archive
+}

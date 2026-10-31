@@ -1,0 +1,162 @@
+// MODULE 1: CATALOG
+// What Taya offers: categories, equipment, products, services, trainings
+// Source: docs/spec/02-data-model.md
+
+// ── Enums ──
+
+enum Division {
+  EQUIPMENT
+  TRAINING
+  INSPECTION_TESTING
+  MATERIALS
+  WASTE_MANAGEMENT
+  WORKFORCE
+  ENGINEERING
+  PAINT_RWANDA
+}
+
+enum CategoryType {
+  EQUIPMENT
+  PRODUCT
+  SERVICE
+}
+
+enum EquipmentStatus {
+  PENDING
+  AVAILABLE
+  RENTED
+  SOLD
+  INACTIVE
+}
+
+enum RentUnit {
+  DAY
+  WEEK
+  MONTH
+  PROJECT
+}
+
+enum ProductUnit {
+  PIECE
+  BAG
+  M2
+  M3
+  TON
+  LITRE
+  TRIP
+}
+
+enum TrainingType {
+  HSE
+  CONSTRUCTION
+}
+
+// ── Models ──
+
+model Category {
+  id          String       @id @default(uuid())
+  name        String
+  slug        String       @unique
+  type        CategoryType
+  division    Division
+  description String?
+  image       String?
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  equipment Equipment[]
+  products  Product[]
+  services  Service[]
+
+  @@index([type])
+  @@index([division])
+}
+
+model Equipment {
+  id          String          @id @default(uuid())
+  categoryId  String
+  ownerId     String? // Vendor. Empty = Taya-owned
+  name        String
+  slug        String          @unique
+  description String
+  images      String[]
+  specs       Json? // [{ label, value }]
+  location    String
+  forRent     Boolean         @default(false)
+  rentPrice   Int?
+  rentUnit    RentUnit?
+  forSale     Boolean         @default(false)
+  salePrice   Int?
+  status      EquipmentStatus @default(PENDING)
+  isFeatured  Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  category Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  owner    Vendor?            @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  requests EquipmentRequest[]
+
+  @@index([categoryId])
+  @@index([ownerId])
+  @@index([status])
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  categoryId  String
+  supplierId  String?
+  name        String
+  slug        String      @unique
+  description String
+  images      String[]
+  brand       String?
+  price       Int?
+  unit        ProductUnit
+  isAvailable Boolean     @default(true)
+  isFeatured  Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  category Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  supplier Vendor?       @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  orders   SupplyOrder[]
+
+  @@index([categoryId])
+  @@index([supplierId])
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  categoryId  String
+  name        String
+  slug        String   @unique
+  summary     String
+  description String
+  content     Json? // [{ type: text|list|steps|faq, title, ... }]
+  image       String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  requests ServiceRequest[]
+
+  @@index([categoryId])
+}
+
+model Training {
+  id          String       @id @default(uuid())
+  title       String
+  slug        String       @unique
+  summary     String
+  image       String?
+  type        TrainingType
+  duration    String?
+  externalUrl String // Prime Safety Global
+  isFeatured  Boolean      @default(false)
+  isPublished Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}

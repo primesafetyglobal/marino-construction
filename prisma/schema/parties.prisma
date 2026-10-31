@@ -1,0 +1,140 @@
+// MODULE 3: PARTIES & PAYMENTS
+// Clients, vendors, applicants, payments
+// Source: docs/spec/02-data-model.md
+
+// ── Enums ──
+
+enum PartyType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum VendorType {
+  EQUIPMENT_OWNER
+  SUPPLIER
+  GARAGE
+  TECHNICIAN
+  CONTRACTOR
+  RECYCLER
+  OTHER
+}
+
+enum VendorStatus {
+  PENDING
+  APPROVED
+  INACTIVE
+}
+
+enum PaymentStatus {
+  DUE
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  MOMO
+  BANK
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// ── Models ──
+
+model Client {
+  id          String    @id @default(uuid())
+  name        String
+  phone       String?   @unique
+  email       String?   @unique
+  entityType  PartyType @default(INDIVIDUAL)
+  companyName String?
+  tin         String?   @unique
+  district    String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  equipmentRequests EquipmentRequest[]
+  supplyOrders      SupplyOrder[]
+  serviceRequests   ServiceRequest[]
+  workforceRequests WorkforceRequest[]
+  reviews           Review[]
+}
+
+model Vendor {
+  id          String       @id @default(uuid())
+  name        String
+  phone       String?      @unique
+  email       String?      @unique
+  type        VendorType
+  entityType  PartyType    @default(INDIVIDUAL)
+  companyName String?
+  tin         String?      @unique
+  district    String?
+  offerings   String
+  logo        String?
+  website     String?
+  status      VendorStatus @default(PENDING)
+  isPartner   Boolean      @default(false)
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  equipment       Equipment[]
+  products        Product[]
+  supplyOrders    SupplyOrder[]
+  serviceRequests ServiceRequest[]
+
+  @@index([type])
+  @@index([district])
+  @@index([status])
+  @@index([isPartner])
+}
+
+model Applicant {
+  id          String   @id @default(uuid())
+  fullName    String
+  phone       String?  @unique
+  email       String?  @unique
+  dateOfBirth DateTime @db.Date
+  gender      Gender?
+  trade       String
+  experience  String
+  district    String?
+  cvUrl       String?
+  details     Json? // { educationLevel?, languages?, skills?, certifications?, nationality? }
+  consentAt   DateTime
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  applications JobApplication[]
+}
+
+model Payment {
+  id                 String         @id @default(uuid())
+  amount             Int
+  status             PaymentStatus  @default(DUE)
+  method             PaymentMethod?
+  dueDate            DateTime?      @db.Date
+  paidAt             DateTime?
+  reference          String?
+  // Exactly one of the three links below is set (enforced in payment.service.ts)
+  equipmentRequestId String?
+  supplyOrderId      String?
+  serviceRequestId   String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  equipmentRequest EquipmentRequest? @relation(fields: [equipmentRequestId], references: [id], onDelete: Restrict)
+  supplyOrder      SupplyOrder?      @relation(fields: [supplyOrderId], references: [id], onDelete: Restrict)
+  serviceRequest   ServiceRequest?   @relation(fields: [serviceRequestId], references: [id], onDelete: Restrict)
+
+  @@index([status])
+  @@index([dueDate])
+  @@index([equipmentRequestId])
+  @@index([supplyOrderId])
+  @@index([serviceRequestId])
+}

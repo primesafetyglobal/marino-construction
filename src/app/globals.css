@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+/* Marino brand tokens (docs/spec/04-design.md §2). Light only in v1. */
+/* Marino tokens: "Site-office precision" (docs/spec/04-design.md §2). Light only.
+   Yellow is for primary actions, active states and small accents; never text on white. */
+@theme {
+  --color-brand: #f5b301;
+  --color-brand-hover: #e0a200;
+  --color-brand-tint: #fff4d1;
+  --color-charcoal: #16181d;
+  --color-charcoal-soft: #24272e;
+  --color-ink: #16181d;
+  --color-surface: #ffffff;
+  --color-canvas: #f4f4f2;
+  --color-muted: #6b6b66;
+  --color-line: #e3e3df;
+  --color-line-strong: #cfcfc9;
+  --color-mist: #f4f4f2;
+  /* Warm tones from the hero photo (red earth, golden light). */
+  --color-sand: #faf7f0;
+  --color-sand-deep: #efe8d8;
+  --color-earth: #8a3f1a;
+  --color-earth-deep: #3a1d0c;
+  --color-success: #1a7f37;
+  --color-success-tint: #e7f4eb;
+  --color-warning: #b45309;
+  --color-warning-tint: #fdf1e3;
+  --color-danger: #c81e1e;
+  --color-danger-tint: #fdeaea;
+  --color-info: #1d4ed8;
+  --color-info-tint: #e8eefc;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-archivo), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-input: 12px;
+  --radius-card: 16px;
+  --radius-sheet: 20px;
+
+  /* One soft level for raised items; hairline borders do the rest. */
+  --shadow-soft: 0 1px 2px rgb(22 24 29 / 0.05), 0 4px 12px rgb(22 24 29 / 0.04);
+  --shadow-lift: 0 2px 4px rgb(22 24 29 / 0.06), 0 12px 32px rgb(22 24 29 / 0.10);
+
+  --animate-fade-up: fade-up 220ms ease-out both;
+  --animate-sheet-right: sheet-right 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-sheet-up: sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade: fade 200ms ease-out both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes sheet-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes sheet-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 1024px) {
+  body {
+    font-size: 17px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-stretch: 88%;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Codes, prices, quantities, dates in tables. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Signature details (use sparingly). */
+.blueprint {
+  background-image:
+    linear-gradient(rgb(22 24 29 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(22 24 29 / 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.blueprint-dark {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+/* 45° hazard stripe: attention items only (overdue, pending approval). */
+.hazard {
+  background-image: repeating-linear-gradient(-45deg, var(--color-brand) 0 6px, var(--color-charcoal) 6px 12px);
+}
+.hazard-edge {
+  position: relative;
+}
+.hazard-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(-45deg, var(--color-brand) 0 5px, var(--color-charcoal) 5px 10px);
+}
+/* Thin yellow rule under page headers. */
+.yellow-rule {
+  display: block;
+  width: 40px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-brand);
+}
+
+/* Lucide icons: thin 1.5px stroke (Design §2). */
+.lucide {
+  stroke-width: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}

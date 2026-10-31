@@ -1,0 +1,100 @@
+// MODULE 4: ACCESS & FEEDBACK
+// Staff users with roles, reviews and feedback
+// Source: docs/spec/02-data-model.md
+
+// ── Enums ──
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+}
+
+enum ReviewStatus {
+  NEW
+  PUBLIC
+  PRIVATE
+}
+
+// ── Models ──
+
+model User {
+  id                 String    @id @default(uuid())
+  name               String
+  email              String    @unique
+  phone              String?
+  password           String // hash only
+  role               Role      @default(STAFF)
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true)
+  lastLoginAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  equipmentRequests EquipmentRequest[]
+  supplyOrders      SupplyOrder[]
+  serviceRequests   ServiceRequest[]
+  workforceRequests WorkforceRequest[]
+
+  authTokens AuthToken[]
+  authEvents AuthEvent[]
+
+  @@index([role])
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+  INVITE
+}
+
+model AuthToken {
+  id        String        @id @default(uuid())
+  type      AuthTokenType
+  tokenHash String        @unique
+
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type]) // retire older tokens of the same type
+}
+
+model AuthEvent {
+  id        String   @id @default(uuid())
+  ip        String?
+  userAgent String?
+  type      String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@index([ip, type, createdAt]) // IP rate limits (AUTH-R6)
+}
+
+model Review {
+  id        String       @id @default(uuid())
+  fullName  String
+  company   String?
+  phone     String? // private
+  email     String? // private
+  clientId  String?
+  division  Division?
+  rating    Int // 1–5
+  message   String
+  status    ReviewStatus @default(NEW)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([status])
+}
