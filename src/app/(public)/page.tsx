@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { ArrowDown, ArrowUpRight, MessageCircle, PaintRoller } from "lucide-react";
 import { DIVISIONS } from "@/config/divisions";
 import { SITE, whatsappHref } from "@/config/site";
@@ -128,6 +129,18 @@ export default function HomePage() {
   );
 }
 
+// The home page is the front door: a failing featured section is logged and
+// hidden instead of taking the whole page down.
+async function optional<T>(load: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await load;
+  } catch (err) {
+    unstable_rethrow(err);
+    console.error("[home] featured section failed", err);
+    return fallback;
+  }
+}
+
 function Fallback() {
   return (
     <Section>
@@ -137,7 +150,7 @@ function Fallback() {
 }
 
 async function FeaturedEquipment() {
-  const items = await getFeaturedEquipment.page({ limit: 8 });
+  const items = await optional(getFeaturedEquipment.page({ limit: 8 }), []);
   if (!items.length) return null;
   return (
     <Section>
@@ -152,7 +165,7 @@ async function FeaturedEquipment() {
 }
 
 async function FeaturedMaterials() {
-  const items = await getFeaturedProducts.page({ limit: 8 });
+  const items = await optional(getFeaturedProducts.page({ limit: 8 }), []);
   if (!items.length) return null;
   return (
     <Section tone="mist">
@@ -167,7 +180,7 @@ async function FeaturedMaterials() {
 }
 
 async function FeaturedInspections() {
-  const items = await getFeaturedServices.page({ division: "INSPECTION_TESTING", limit: 4 });
+  const items = await optional(getFeaturedServices.page({ division: "INSPECTION_TESTING", limit: 4 }), []);
   if (!items.length) return null;
   return (
     <Section>
@@ -182,7 +195,7 @@ async function FeaturedInspections() {
 }
 
 async function FeaturedTrainings() {
-  const items = await getFeaturedTrainings.page({ limit: 4 });
+  const items = await optional(getFeaturedTrainings.page({ limit: 4 }), []);
   if (!items.length) return null;
   return (
     <Section tone="mist">
@@ -197,7 +210,7 @@ async function FeaturedTrainings() {
 }
 
 async function ClientsSay() {
-  const [reviews, summary] = await Promise.all([getPublicReviews.page({ limit: 6 }), getReviewSummary.page({})]);
+  const [reviews, summary] = await optional(Promise.all([getPublicReviews.page({ limit: 6 }), getReviewSummary.page({})]), [{ items: [], nextCursor: null }, { average: null, count: 0 }]);
   if (!reviews.items.length) return null;
   return (
     <Section>
@@ -227,7 +240,7 @@ async function ClientsSay() {
 }
 
 async function Shops() {
-  const shops = await getFeaturedShops.page({});
+  const shops = await optional(getFeaturedShops.page({}), []);
   return (
     <Section>
       <SectionHeading eyebrow="Shops" title="Featured shops" intro="Buy from our partner suppliers and the Paint Rwanda shop." />

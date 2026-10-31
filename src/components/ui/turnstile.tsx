@@ -24,7 +24,7 @@ function loadScript(): Promise<void> {
 }
 
 // Cloudflare Turnstile on public forms. Renders nothing when no site key is
-// configured (development): the server then skips the check too.
+// configured: the server then skips the check too.
 export function Turnstile({ onToken }: { onToken: (token: string | undefined) => void }) {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
