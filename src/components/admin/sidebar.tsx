@@ -33,7 +33,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { Logo } from "@/components/public/logo";
+import { Logo, LogoMark } from "@/components/public/logo";
 import { CommandPalette, type PaletteLink } from "./command-palette";
 
 export type SidebarCounters = Partial<Record<string, number>>;
@@ -186,7 +186,7 @@ export function AdminShell({ user, counters, canUsers, canFiles = false, childre
       <aside className={cn("fixed inset-y-0 left-0 z-50 hidden flex-col bg-charcoal transition-[width] duration-200 lg:flex", rail ? "w-[72px]" : "w-64")}>
         <div className={cn("flex h-16 items-center border-b border-white/[0.07]", rail ? "justify-center" : "px-5")}>
           <Link href="/admin" aria-label="Marino dashboard home" className="rounded-md">
-            {rail ? <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-black text-charcoal">M</span> : <Logo dark />}
+            {rail ? <LogoMark /> : <Logo dark className="h-9" />}
           </Link>
         </div>
         {nav(rail)}
@@ -201,7 +201,7 @@ export function AdminShell({ user, counters, canUsers, canFiles = false, childre
           <button aria-label="Close menu" className="absolute inset-0 animate-fade bg-charcoal/50" onClick={() => setOpen(false)} />
           <aside className="absolute inset-y-0 left-0 flex w-72 animate-fade flex-col bg-charcoal" aria-label="Menu">
             <div className="flex h-16 items-center justify-between px-5">
-              <Logo dark />
+              <Logo dark className="h-9" />
               <button className="rounded-md p-1 text-white/70" aria-label="Close menu" onClick={() => setOpen(false)}>
                 <X className="h-5 w-5" />
               </button>

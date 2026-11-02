@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -101,16 +102,19 @@ export function Header({ menu }: { menu: MenuData }) {
       <header className="sticky top-0 z-50 border-b border-line bg-white/85 backdrop-blur-md supports-[backdrop-filter]:bg-white/70" onMouseLeave={() => setHover(null)}>
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 lg:px-6">
           <Link href="/" aria-label="Marino Construction home" className="shrink-0">
-            <Logo />
+            <Logo priority className="h-9 sm:h-12" />
           </Link>
           <SearchBox className="ml-auto hidden w-72 xl:block" />
           <div className="ml-auto flex items-center gap-2 xl:ml-0">
             <button className="rounded-full p-2 hover:bg-mist xl:hidden" aria-label="Search" onClick={() => setSearchOpen((v) => !v)}>
               <Search className="h-5 w-5" />
             </button>
-            <RequestButton size="sm" className="hidden rounded-full sm:inline-flex" testId="header-request">
-              Request a quote
-            </RequestButton>
+            {/* Wrapped: the button's own inline-flex would override "hidden". Phones use the bottom bar. */}
+            <span className="hidden sm:block">
+              <RequestButton size="sm" className="rounded-full" testId="header-request">
+                Request a quote
+              </RequestButton>
+            </span>
             <button className="rounded-full p-2 hover:bg-mist lg:hidden" aria-label="Menu" onClick={() => setMobileOpen(true)}>
               <Menu className="h-6 w-6" />
             </button>
@@ -141,7 +145,7 @@ export function Header({ menu }: { menu: MenuData }) {
         {/* Mega-menu flyout */}
         {current && (
           <div className="absolute inset-x-0 top-full hidden border-b border-line/50 bg-white/95 shadow-soft backdrop-blur-xl lg:block animate-fade">
-            <div className="mx-auto grid max-w-7xl grid-cols-[260px_1fr] gap-10 px-6 py-8">
+            <div className="mx-auto grid max-w-7xl grid-cols-[260px_1fr_280px] gap-10 px-6 py-8">
               <div>
                 <p className="text-xs font-semibold tracking-wider text-muted uppercase">{current.tagline}</p>
                 <p className="mt-2 text-2xl font-bold">{current.name}</p>
@@ -159,6 +163,11 @@ export function Header({ menu }: { menu: MenuData }) {
                   </li>
                 ))}
               </ul>
+              <Link href={`/${current.slug}`} className="group relative block aspect-[4/3] overflow-hidden rounded-2xl" tabIndex={-1} aria-hidden>
+                <Image src={current.image} alt="" fill sizes="280px" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                <span className="absolute inset-0 bg-linear-to-t from-charcoal/60 to-transparent" />
+                <span className="absolute bottom-3 left-4 text-sm font-semibold text-white">{current.name}</span>
+              </Link>
             </div>
           </div>
         )}
@@ -174,7 +183,7 @@ export function Header({ menu }: { menu: MenuData }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-[70] flex flex-col bg-white animate-fade lg:hidden">
           <div className="flex h-16 items-center justify-between border-b border-line/50 px-4">
-            <Logo />
+            <Logo className="h-12" />
             <button aria-label="Close menu" className="rounded-full p-2 hover:bg-mist" onClick={() => setMobileOpen(false)}>
               <X className="h-6 w-6" />
             </button>
@@ -184,8 +193,8 @@ export function Header({ menu }: { menu: MenuData }) {
               {DIVISIONS.map((d) => (
                 <li key={d.enum}>
                   <Link href={`/${d.slug}`} className="flex items-center gap-3 rounded-2xl px-3 py-3 hover:bg-mist">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-tint">
-                      <DivisionIcon icon={d.icon} className="h-5 w-5" />
+                    <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-xl">
+                      <Image src={d.image} alt="" fill sizes="64px" className="object-cover" />
                     </span>
                     <span className="flex-1">
                       <span className="block font-semibold">{d.name}</span>

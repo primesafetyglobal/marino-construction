@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="border-t border-sand-deep bg-sand pb-24 text-muted lg:pb-0">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
         <div className="space-y-4">
-          <Logo />
+          <Logo className="h-14" />
           <p className="text-sm">{SITE.description}</p>
           <a href={SITE.links.verifyCertificate} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "sm")}>
             <BadgeCheck className="h-4 w-4" /> Verify certificate

@@ -29,7 +29,8 @@ import { hasPermission, type SessionUser } from "@/server/validation/auth";
 import { db, type DbClient, type Prisma } from "@/server/validation/db";
 import { pageArgs, toPage } from "@/server/validation/pagination";
 import type { RequestMeta, ServiceContext } from "@/server/validation/request";
-import { ACCESS_CONFIG } from "../access.config";
+import { appUrl } from "@/server/integrations/mailer";
+import { ACCESS_CONFIG, ACCESS_PATHS } from "../access.config";
 import { hashToken, newRawToken } from "../access.tokens";
 import { assignableRolesFor } from "../access.fields";
 import { sendInviteEmail, sendResetEmail, sendVerifyEmail } from "../access.emails";
@@ -175,7 +176,7 @@ export async function recordLogout(userId: string): Promise<void> {
 // ======================= Writes (admin) =======================
 
 // ACC-R1, R5, R9, R16.
-export async function inviteUser(data: InviteUserData, ctx: ServiceContext): Promise<UserRef & { emailSent: boolean }> {
+export async function inviteUser(data: InviteUserData, ctx: ServiceContext): Promise<UserRef & { emailSent: boolean; inviteUrl: string }> {
   assertCanAssign(ctx.actor, data.role);
   const { user, raw } = await db.$transaction(async (tx) => {
     const taken = await tx.user.findUnique({ where: { email: data.email }, select: { id: true } });
@@ -192,11 +193,12 @@ export async function inviteUser(data: InviteUserData, ctx: ServiceContext): Pro
     () => true,
     (err) => (console.error("[access] invite email failed", err), false),
   );
-  return { ...user, emailSent };
+  // Email is not configured yet: the admin copies this link and shares it.
+  return { ...user, emailSent, inviteUrl: appUrl(ACCESS_PATHS.invite(raw)) };
 }
 
 // ACC-R1, R5.
-export async function resendInvite({ id }: UserIdData, ctx: ServiceContext): Promise<UserRef & { emailSent: boolean }> {
+export async function resendInvite({ id }: UserIdData, ctx: ServiceContext): Promise<UserRef & { emailSent: boolean; inviteUrl: string }> {
   const { user, raw } = await db.$transaction(async (tx) => {
     const target = await findTarget(id, ctx.actor, tx);
     if (target.password !== NO_PASSWORD) throw Errors.conflict("This user has already accepted the invite.");
@@ -208,7 +210,7 @@ export async function resendInvite({ id }: UserIdData, ctx: ServiceContext): Pro
     () => true,
     (err) => (console.error("[access] invite email failed", err), false),
   );
-  return { ...user, emailSent };
+  return { ...user, emailSent, inviteUrl: appUrl(ACCESS_PATHS.invite(raw)) };
 }
 
 // ACC-R1, R2, R3, R9, R16.

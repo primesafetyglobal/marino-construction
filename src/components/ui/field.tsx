@@ -4,6 +4,7 @@
 // FormFooter (sticky Cancel / Save, unsaved-changes warning). CLIENT-SAFE.
 
 import { useEffect, useId, useState, type ComponentProps, type ReactNode } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 // Full width unless the caller sets its own width (w-auto, w-32, …): cn() does not merge classes.
@@ -81,6 +82,7 @@ export function Input({
   suffix,
   ...props
 }: Omit<ComponentProps<"input">, "prefix"> & { invalid?: boolean; prefix?: ReactNode; suffix?: ReactNode }) {
+  if (props.type === "password") return <PasswordInput className={className} invalid={invalid} {...props} />;
   const id = props.id ?? props.name;
   const input = (
     <input
@@ -96,6 +98,31 @@ export function Input({
       {prefix && <span className="pointer-events-none absolute inset-y-0 left-0 flex w-12 items-center justify-center border-r border-line text-xs font-semibold text-muted">{prefix}</span>}
       {input}
       {suffix && <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs font-medium text-muted">{suffix}</span>}
+    </div>
+  );
+}
+
+// Every password field: a show / hide toggle on the right.
+function PasswordInput({ className, invalid, ...props }: ComponentProps<"input"> & { invalid?: boolean }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className={cn("relative", width(className))}>
+      <input
+        id={props.id ?? props.name}
+        aria-invalid={invalid || undefined}
+        {...props}
+        type={visible ? "text" : "password"}
+        className={cn(control, "h-11 w-full pr-11", invalid && "border-danger", className)}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? "Hide password" : "Show password"}
+        aria-pressed={visible}
+        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-[inherit] text-muted hover:text-ink"
+      >
+        {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
     </div>
   );
 }

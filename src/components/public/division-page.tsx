@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, CalendarCheck, CheckCircle2, ClipboardList, Cog, HardHat, MessageCircle, Package, Truck, Users, Wallet } from "lucide-react";
 import type { Division } from "@/config/divisions";
@@ -46,28 +47,36 @@ export async function DivisionPage({ division, searchParams }: { division: Divis
       <section className="relative overflow-hidden bg-gradient-to-br from-sand-deep via-sand to-white">
         <div className="absolute -top-24 -right-16 h-80 w-80 rounded-full bg-brand/30 blur-3xl" />
         <div className="absolute inset-0 text-earth opacity-[0.06] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:22px_22px]" />
-        <Container className="relative py-12 lg:py-16">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-charcoal">
-              <DivisionIcon icon={division.icon} className="h-6 w-6" />
-            </span>
-            <p className="text-xs font-semibold tracking-[0.16em] text-earth uppercase">{division.tagline}</p>
-          </div>
-          <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">{isPaint ? "We Paint. You Pay Later!" : division.name}</h1>
-          <p className="mt-3 max-w-2xl text-lg text-muted">{isPaint ? division.intro : division.heading}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            {target ? (
-              <RequestButton size="lg" target={target} testId="division-request">
-                {division.variant === "workforce" ? "Request workers" : isPaint ? "Request painting" : "Request a quote"}
-              </RequestButton>
-            ) : (
-              <a href={SITE.links.primeSafetyGlobal} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg")}>
-                Browse courses on Prime Safety Global <ArrowUpRight className="h-4 w-4" />
+        <Container className="relative grid items-center gap-10 py-12 lg:grid-cols-[1.1fr_1fr] lg:py-16">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-charcoal">
+                <DivisionIcon icon={division.icon} className="h-6 w-6" />
+              </span>
+              <p className="text-xs font-semibold tracking-[0.16em] text-earth uppercase">{division.tagline}</p>
+            </div>
+            <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">{isPaint ? "We Paint. You Pay Later!" : division.name}</h1>
+            <p className="mt-3 max-w-2xl text-lg text-muted">{isPaint ? division.intro : division.heading}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {target ? (
+                <RequestButton size="lg" target={target} testId="division-request">
+                  {division.variant === "workforce" ? "Request workers" : isPaint ? "Request painting" : "Request a quote"}
+                </RequestButton>
+              ) : (
+                <a href={SITE.links.primeSafetyGlobal} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg")}>
+                  Browse courses on Prime Safety Global <ArrowUpRight className="h-4 w-4" />
+                </a>
+              )}
+              <a href={whatsappHref(`Hello Marino, I'm interested in ${division.name}`)} target="_blank" rel="noopener noreferrer" className={buttonClass("outline", "lg")}>
+                <MessageCircle className="h-5 w-5" /> WhatsApp
               </a>
-            )}
-            <a href={whatsappHref(`Hello Marino, I'm interested in ${division.name}`)} target="_blank" rel="noopener noreferrer" className={buttonClass("outline", "lg")}>
-              <MessageCircle className="h-5 w-5" /> WhatsApp
-            </a>
+            </div>
+          </div>
+          <div className="relative">
+            <div className="absolute -bottom-3 -left-3 h-full w-full rounded-[28px] bg-brand" aria-hidden />
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-lift ring-1 ring-charcoal/5">
+              <Image src={division.image} alt={division.name} fill priority sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover" />
+            </div>
           </div>
         </Container>
       </section>

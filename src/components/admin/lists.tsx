@@ -25,6 +25,7 @@ import { useToast } from "@/components/ui/toast";
 import type { ActionResult } from "@/server/core/result";
 import { deleteReview, setReviewStatus } from "@/server/modules/access/review/review.actions";
 import { PayDialog } from "./payments-panel";
+import { CopyInviteLinkButton } from "./user-forms";
 import { DataTable, FilterBar, useApiList, type Column, type Filter, type Params } from "./list";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -377,6 +378,7 @@ export function UsersList({ initial, params }: { initial: Page; params: Params }
         { header: "Role", cell: (r) => humanize(r.role) },
         { header: "Status", cell: (r) => (r.invitePending ? <Badge tone="warning">Invite pending</Badge> : r.isActive ? <Badge tone="success">Active</Badge> : <Badge>Inactive</Badge>) },
         { header: "Last login", cell: (r) => formatDateTime(r.lastLoginAt) },
+        { header: "", cell: (r) => (r.invitePending ? <CopyInviteLinkButton id={r.id} /> : null) },
       ]}
     />
   );

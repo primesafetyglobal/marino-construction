@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DIVISIONS, type DivisionEnum } from "@/config/divisions";
 import { SITE } from "@/config/site";
-import { DivisionIcon } from "@/components/ui/icons";
 import { useRequestSheet, type RequestTarget } from "./request-sheet";
 
 function targetOf(d: DivisionEnum): RequestTarget | null {
@@ -26,8 +26,8 @@ export function RequestChooser({ preselected }: { preselected?: DivisionEnum }) 
         const t = targetOf(d.enum);
         const inner = (
           <>
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-tint">
-              <DivisionIcon icon={d.icon} className="h-5 w-5" />
+            <span className="relative h-14 w-[72px] shrink-0 overflow-hidden rounded-xl">
+              <Image src={d.image} alt="" fill sizes="72px" className="object-cover" />
             </span>
             <span className="flex-1 text-left">
               <span className="block font-semibold">{d.name}</span>

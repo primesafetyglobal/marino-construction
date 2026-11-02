@@ -1,9 +1,9 @@
 import { ActionButton } from "@/components/admin/actions";
-import { EditUserButton } from "@/components/admin/user-forms";
+import { EditUserButton, NewInviteLinkButton } from "@/components/admin/user-forms";
 import { DefList, PageHeader, Panel } from "@/components/admin/ui";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime, formatPhone, humanize } from "@/lib/format";
-import { deleteUser, resendInvite, sendPasswordReset, setUserActive } from "@/server/modules/access/user/user.actions";
+import { deleteUser, sendPasswordReset, setUserActive } from "@/server/modules/access/user/user.actions";
 import { getUser } from "@/server/modules/access/user/user.queries";
 import { getUserActivity } from "@/server/modules/access/auth-event/auth-event.queries";
 
@@ -24,9 +24,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
           <>
             {u.can.edit && <EditUserButton user={u} roles={u.can.roles} />}
             {u.can.resendInvite && (
-              <ActionButton action={resendInvite.bind(null, { id: u.id })} success="Invite sent again.">
-                Resend invite
-              </ActionButton>
+              <NewInviteLinkButton user={{ id: u.id, name: u.name }} />
             )}
             {u.can.sendReset && (
               <ActionButton action={sendPasswordReset.bind(null, { id: u.id })} success="Reset link sent.">

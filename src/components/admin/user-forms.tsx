@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Loader2 } from "lucide-react";
+import { Check, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input, Select } from "@/components/ui/field";
 import { Dialog } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/toast";
 import { useActionForm } from "@/lib/forms";
-import { changeOwnPassword, inviteUser, requestEmailChange, updateUser } from "@/server/modules/access/user/user.actions";
+import { changeOwnPassword, inviteUser, requestEmailChange, resendInvite, updateUser } from "@/server/modules/access/user/user.actions";
 import { changeOwnPasswordSchema, inviteUserSchema, requestEmailChangeSchema, updateUserSchema } from "@/server/modules/access/user/user.schema";
 import { ROLE_LABEL } from "@/server/modules/access/access.fields";
 
@@ -20,7 +20,8 @@ export function InviteUserButton({ roles }: { roles: Role[] }) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [v, setV] = useState({ name: "", email: "", role: "STAFF", phone: "" });
-  const form = useActionForm<{ emailSent: boolean }>();
+  const form = useActionForm<{ emailSent: boolean; inviteUrl: string }>();
+  const [link, setLink] = useState<{ name: string; url: string } | null>(null);
   return (
     <>
       <Button onClick={() => setOpen(true)} data-testid="invite-open">
@@ -37,13 +38,14 @@ export function InviteUserButton({ roles }: { roles: Role[] }) {
             onClick={async () => {
               const r = await form.run({ schema: inviteUserSchema, input: v, action: inviteUser });
               if (!r) return;
-              toast(r.emailSent ? "success" : "error", r.emailSent ? "Invite sent." : "User created, but the invite email failed. Use “Resend invite”.");
+              toast("success", "User created.");
               setOpen(false);
+              setLink({ name: v.name, url: r.inviteUrl });
               setV({ name: "", email: "", role: "STAFF", phone: "" });
               router.refresh();
             }}
           >
-            {form.pending && <Loader2 className="h-4 w-4 animate-spin" />} Send invite
+            {form.pending && <Loader2 className="h-4 w-4 animate-spin" />} Create invite link
           </Button>
         }
       >
@@ -66,10 +68,11 @@ export function InviteUserButton({ roles }: { roles: Role[] }) {
               ))}
             </Select>
           </Field>
-          <p className="text-xs text-muted">The user gets an email link (valid 7 days) to set their own password.</p>
+          <p className="text-xs text-muted">You get an invite link (valid 7 days) to share with the user. They open it to set their own password.</p>
           <FormError message={form.formError && !form.formError.fieldErrors ? form.formError.message : null} />
         </div>
       </Dialog>
+      <InviteLinkDialog link={link} onClose={() => setLink(null)} />
     </>
   );
 }
@@ -188,5 +191,98 @@ export function ChangeEmailForm() {
         {form.pending && <Loader2 className="h-4 w-4 animate-spin" />} Send confirmation link
       </Button>
     </form>
+  );
+}
+
+// Invite link shown to the inviting admin. Email is not configured yet, so
+// they copy it and share it themselves (WhatsApp, chat...).
+function InviteLinkDialog({ link, onClose }: { link: { name: string; url: string } | null; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    if (!link) return;
+    await navigator.clipboard.writeText(link.url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <Dialog
+      open={!!link}
+      onClose={onClose}
+      title="Share the invite link"
+      footer={
+        <Button variant="outline" onClick={onClose}>
+          Done
+        </Button>
+      }
+    >
+      <div className="space-y-3">
+        <p className="text-sm text-muted">Send this link to {link?.name}. It works once and expires in 7 days. Anyone with the link can set the password, so share it only with them.</p>
+        <div className="flex gap-2">
+          <Input readOnly value={link?.url ?? ""} onFocus={(e) => e.currentTarget.select()} aria-label="Invite link" data-testid="invite-link" className="font-mono text-xs" />
+          <Button onClick={copy} data-testid="invite-copy">
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "Copied" : "Copy"}
+          </Button>
+        </div>
+      </div>
+    </Dialog>
+  );
+}
+
+// A fresh invite link for a user who has not accepted yet (the old link stops working).
+export function NewInviteLinkButton({ user }: { user: { id: string; name: string } }) {
+  const router = useRouter();
+  const toast = useToast();
+  const [pending, setPending] = useState(false);
+  const [link, setLink] = useState<{ name: string; url: string } | null>(null);
+  return (
+    <>
+      <Button
+        variant="outline"
+        disabled={pending}
+        data-testid="invite-new-link"
+        onClick={async () => {
+          setPending(true);
+          const r = await resendInvite({ id: user.id });
+          setPending(false);
+          if (!r.ok) return toast("error", r.error.message);
+          setLink({ name: user.name, url: r.data.inviteUrl });
+          router.refresh();
+        }}
+      >
+        {pending && <Loader2 className="h-4 w-4 animate-spin" />} Get invite link
+      </Button>
+      <InviteLinkDialog link={link} onClose={() => setLink(null)} />
+    </>
+  );
+}
+
+// Users list row: a fresh invite link straight to the clipboard. Tokens are
+// stored hashed, so an old link cannot be shown again; the previous one stops working.
+export function CopyInviteLinkButton({ id }: { id: string }) {
+  const toast = useToast();
+  const [state, setState] = useState<"idle" | "pending" | "copied">("idle");
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      disabled={state === "pending"}
+      data-testid="invite-row-copy"
+      onClick={async (e) => {
+        e.stopPropagation();
+        setState("pending");
+        const r = await resendInvite({ id });
+        if (!r.ok) {
+          setState("idle");
+          return toast("error", r.error.message);
+        }
+        await navigator.clipboard.writeText(r.data.inviteUrl);
+        setState("copied");
+        toast("success", "New invite link copied. Earlier links no longer work.");
+        setTimeout(() => setState("idle"), 2000);
+      }}
+    >
+      {state === "pending" ? <Loader2 className="h-4 w-4 animate-spin" /> : state === "copied" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      {state === "copied" ? "Copied" : "Copy invite link"}
+    </Button>
   );
 }

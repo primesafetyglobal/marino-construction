@@ -34,8 +34,8 @@ export function SmartImage({
 }) {
   if (src) {
     const hosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? "").split(",").filter(Boolean);
-    let optimised = false;
-    try {
+    let optimised = src.startsWith("/");
+    if (!optimised) try {
       optimised = hosts.includes(new URL(src).host);
     } catch {
       optimised = false;

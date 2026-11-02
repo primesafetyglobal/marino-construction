@@ -24,6 +24,8 @@ export type Division = {
   shortName: string;
   tagline: string;
   subServices: string[];
+  /** Photo in public/images/divisions (1448×1086, 4:3). */
+  image: string;
   icon: "Truck" | "GraduationCap" | "SearchCheck" | "BrickWall" | "Recycle" | "HardHat" | "Building2" | "PaintRoller";
   variant: DivisionVariant;
   heading: string;
@@ -36,6 +38,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 1,
     enum: "EQUIPMENT",
     slug: "equipment",
+    image: "/images/divisions/equipment.webp",
     name: "Equipment",
     shortName: "Equipment",
     tagline: "Rent • Buy • Trade • Spare Parts • Maintenance",
@@ -55,6 +58,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 2,
     enum: "TRAINING",
     slug: "training",
+    image: "/images/divisions/safety-training.webp",
     name: "Safety & Training",
     shortName: "Training",
     tagline: "HSE • Construction • Certifications • Accredited Training",
@@ -74,6 +78,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 3,
     enum: "INSPECTION_TESTING",
     slug: "inspection-testing",
+    image: "/images/divisions/inspection-testing.webp",
     name: "Inspection & Testing",
     shortName: "Inspection",
     tagline: "Safety • Quality • Environmental • Structural • Testing",
@@ -93,6 +98,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 4,
     enum: "MATERIALS",
     slug: "materials",
+    image: "/images/divisions/materials.webp",
     name: "Materials",
     shortName: "Materials",
     tagline: "Construction Materials • Paint • Tiles • Waterproofing • Chemicals",
@@ -112,6 +118,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 5,
     enum: "WASTE_MANAGEMENT",
     slug: "waste-management",
+    image: "/images/divisions/waste-management.webp",
     name: "Waste Management",
     shortName: "Waste",
     tagline: "Waste Collection • Reuse • Recycling • Waste Trading",
@@ -131,6 +138,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 6,
     enum: "WORKFORCE",
     slug: "workforce",
+    image: "/images/divisions/workforce.webp",
     name: "Workforce",
     shortName: "Workforce",
     tagline: "Skilled Workers • Operators • Professionals • Manpower",
@@ -150,6 +158,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 7,
     enum: "ENGINEERING",
     slug: "engineering",
+    image: "/images/divisions/engineering-construction.webp",
     name: "Engineering & Construction",
     shortName: "Engineering",
     tagline: "Design • Consultancy • Civil • MEP • Painting • Tiling • Production",
@@ -169,6 +178,7 @@ export const DIVISIONS: readonly Division[] = [
     number: 8,
     enum: "PAINT_RWANDA",
     slug: "paint-rwanda",
+    image: "/images/divisions/paint-rwanda.webp",
     name: "Paint Rwanda",
     shortName: "Paint Rwanda",
     tagline: "Paint Sales • Painting Services • Flexible Payment",

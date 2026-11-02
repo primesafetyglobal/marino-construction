@@ -134,9 +134,10 @@ export function TrainingCard({ item }: { item: TrainingPublic }) {
 export function DivisionCard({ division }: { division: Division }) {
   return (
     <article className={card}>
-      <Link href={`/${division.slug}`} className="relative">
-        <SmartImage alt={division.name} icon={division.icon} seed={division.number} className="aspect-[16/10]" />
-        <span className="absolute top-3 left-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-bold">{String(division.number).padStart(2, "0")}</span>
+      <Link href={`/${division.slug}`} className="group relative block overflow-hidden">
+        <SmartImage src={division.image} alt={division.name} icon={division.icon} seed={division.number} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="aspect-[4/3] transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+        <span className="pointer-events-none absolute inset-0 bg-linear-to-t from-charcoal/45 via-transparent to-transparent" aria-hidden />
+        <span className="absolute top-3 left-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-bold backdrop-blur">{String(division.number).padStart(2, "0")}</span>
       </Link>
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-center gap-2.5">
